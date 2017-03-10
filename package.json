@@ -1,0 +1,35 @@
+{
+  "name": "@copal/launcher",
+  "version": "0.0.1",
+  "description": "",
+  "author": "AndSelm <and.selm@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:FunkMonkey/copal-launcher.git"
+  },
+  "homepage": "https://github.com/FunkMonkey/copal-launcher",
+  "bugs": {
+    "url": "https://github.com/FunkMonkey/copal-launcher/issues"
+  },
+  "main": "build/main/index.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "gulp build",
+    "watch:build": "gulp watch:build"
+  },
+  "devDependencies": {
+    "babel-preset-es2015": "6.22.0",
+    "eslint": "3.16.1",
+    "eslint-config-airbnb-base": "11.1.0",
+    "eslint-plugin-import": "2.2.0",
+    "gulp": "3.9.1",
+    "gulp-babel": "6.1.2",
+    "gulp-util": "3.0.8"
+  },
+  "dependencies": {
+    "electron-prebuilt": "1.4.13",
+    "ramda": "0.21.0",
+    "rx": "4.1.0"
+  }
+}
