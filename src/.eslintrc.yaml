@@ -1,4 +1,4 @@
-  extends: "airbnb-base"
+  extends: "airbnb"
   env:
     node: true
   rules:
@@ -13,3 +13,5 @@
     no-plusplus: "off"
     no-underscore-dangle: "off"
     space-in-parens: ["error", "always"]
+
+    react/jsx-filename-extension: "off"

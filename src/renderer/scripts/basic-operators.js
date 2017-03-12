@@ -1,11 +1,18 @@
-import Rx from 'rx';
+// import Rx from 'rx';
 
-export default function ( ) {
+export default function ( launcher ) {
+  let lastRenderSubscription = null;
+
   return {
-    'launcher.fromInput': () =>
-      Rx.Observable.from( ['c', 'co', 'col'] ),
+    'launcher.fromInput': () => launcher.input$.startWith( '' ),
 
-    'launcher.render': ( [ source$ ] ) =>
-      source$.subscribe( items => { console.log( items ); } )
+    'launcher.render': ( [ source$ ] ) => {
+      if ( lastRenderSubscription ) {
+        lastRenderSubscription.dispose();
+        lastRenderSubscription = null;
+      }
+
+      lastRenderSubscription = source$.subscribe( launcher.output$ );
+    }
   };
 }
