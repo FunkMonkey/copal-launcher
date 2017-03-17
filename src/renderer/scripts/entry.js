@@ -1,11 +1,12 @@
 import fs from 'fs';
 import path from 'path';
-import React from 'react';
 import ReactDOM from 'react-dom';
 import Rx from 'rx';
 import createDesktopDrivers from '@copal/drivers-desktop';
 import CopalCore from '@copal/core';
 import getBasicOperators from './basic-operators';
+
+import * as Cyclic from './utils/cyclic';
 import Main from './ui/main';
 
 function createLauncher() {
@@ -19,8 +20,21 @@ function createLauncher() {
   const core = new CopalCore( drivers );
 
   return {
-    input$: new Rx.Subject(),
+    currCommand: null,
+
+    input: {
+      from$: new Rx.Subject(),
+      to$: new Rx.Subject(),
+      focus$: new Rx.Subject()
+    },
+
     output$: new Rx.Subject(),
+
+    listview: {
+      chosen$: new Rx.Subject(),
+      selectIndex$: new Rx.Subject()
+    },
+
     core,
     init() {
       return core.init()
@@ -28,12 +42,26 @@ function createLauncher() {
           core.addOperators( getBasicOperators( this ) );
           console.log( 'Finished core initialization' );
 
-          ReactDOM.render(
-            <Main launcher={this} />,
-            document.querySelector( '.copal-content' )
-          );
+          const main = Cyclic.instance( Main, { launcher: this } );
+
+          ReactDOM.render( main, document.querySelector( '.copal-content' ) );
           console.log( 'Finished render initialization' );
-        } )
+        } );
+    },
+
+    resetUI() {
+      this.input.focus$.onNext();
+      this.input.to$.onNext( '' );
+      this.listview.selectIndex$.onNext( -1 );
+    },
+
+    executeCommand( commandName ) {
+      if ( this.currCommand )
+        core.disposeCommand( this.currCommand );
+
+      this.resetUI();
+
+      this.currCommand = core.executeCommand( commandName );
     }
   };
 }
@@ -41,5 +69,5 @@ function createLauncher() {
 export function init() {
   const launcher = createLauncher();
   launcher.init()
-    .subscribe( () => {}, null, () => { launcher.core.executeCommand( 'commands' ); } );
+    .subscribe( () => {}, null, () => { launcher.executeCommand( 'commands' ); } );
 }

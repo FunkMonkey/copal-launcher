@@ -1,61 +1,38 @@
-import Cycle from 'cycle-react';
 import React from 'react';
 import Rx from 'rx';
 
-function createInput( actions ) {
-  const value$ = actions.get( 'OnChange' )
-    .map( ev => ev.target.value );
+import * as Cyclic from '../utils/cyclic';
+import Input from './input';
+import ListView from './list-view';
 
+export default Cyclic.component( 'Main', model => {
+  const launcher = model.launcher;
 
-  const dom$ = Rx.Observable.just(
-    <input
-      type="edit"
-      className="copal-main-input"
-      onChange={actions.listener( 'OnChange' )}
-    />
-  );
+  const input = Cyclic.instance( Input, { value$: launcher.input.to$,
+                                          focus$: launcher.input.focus$ } );
+  input.getEvent( 'value$' ).subscribe( launcher.input.from$ );
+  const inputOnUserExit$ = input.getEvent( 'onUserExit$' ).share();
 
-  return {
-    dom$,
-    value$
-  };
-}
+  const selectIndex$ = Rx.Observable.merge( launcher.listview.selectIndex$,
+                                            inputOnUserExit$.map( () => 0 ) );
+  const listView = Cyclic.instance( ListView, { data$: launcher.output$,
+                                                selectIndex$,
+                                                focus$: inputOnUserExit$ } );
 
-function createListView( actions, model ) {
-  const dom$ = model.data$
-    .startWith( [] )
-    .map( data => {
-      const listItems = data.map( d => <div className="list-item" key={d}>{d}</div> );
+  listView.getEvent( 'chosenListItem$' ).subscribe( launcher.listview.chosen$ );
 
-      return (
-        <div className="copal-view-list">
-          {listItems}
-        </div>
-      );
-    } );
+  return Rx.Observable.just(
+    <div className="copal-main">
+      <div className="copal-main-settings-button">...</div>
 
-  return { dom$ };
-}
+      <div className="copal-main-top-row copal-dark-box">
+        <button className="copal-main-command">NAME</button>
+        {input}
+      </div>
 
-export default Cycle.component( 'Main', ( actions, props, self ) => {
-  const launcher = self.props.launcher;
-  const inputComponent = createInput( actions );
-  inputComponent.value$.subscribe( launcher.input$ );
-  const listViewComponent = createListView( actions, { data$: launcher.output$ } );
-
-  return Rx.Observable.combineLatest( inputComponent.dom$, listViewComponent.dom$,
-   ( inputDOM, listViewDOM ) =>
-     <div className="copal-main">
-       <div className="copal-main-settings-button">...</div>
-
-       <div className="copal-main-top-row copal-dark-box">
-         <button className="copal-main-command">NAME</button>
-         {inputDOM}
-       </div>
-
-       <div className="copal-main-resultbox copal-dark-box">
-         {listViewDOM}
-       </div>
-     </div>
+      <div className="copal-main-resultbox copal-dark-box">
+        {listView}
+      </div>
+    </div>
    );
 } );

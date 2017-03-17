@@ -1,0 +1,11 @@
+.copal-list-view:focus {
+  outline: 0;
+}
+
+.copal-list-view > .list-item {
+  cursor: pointer;
+}
+
+.copal-list-view > .list-item.is-selected {
+  background-color: #3A87AD;
+}

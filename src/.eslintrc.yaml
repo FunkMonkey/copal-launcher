@@ -1,6 +1,7 @@
   extends: "airbnb"
   env:
     node: true
+    browser: true
   rules:
     array-bracket-spacing: ["off"]
     arrow-parens: ["error", "as-needed"]

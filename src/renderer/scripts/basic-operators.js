@@ -1,18 +1,16 @@
 // import Rx from 'rx';
 
+import logSubscription from './utils/log-subscription';
+
 export default function ( launcher ) {
-  let lastRenderSubscription = null;
-
   return {
-    'launcher.fromInput': () => launcher.input$.startWith( '' ),
+    'launcher.executeCommand': ( [ commandName$ ] ) =>
+      commandName$.map( commandName => launcher.executeCommand( commandName ) ),
 
-    'launcher.render': ( [ source$ ] ) => {
-      if ( lastRenderSubscription ) {
-        lastRenderSubscription.dispose();
-        lastRenderSubscription = null;
-      }
+    'launcher.fromInput': () => launcher.input.from$.startWith( '' ),
 
-      lastRenderSubscription = source$.subscribe( launcher.output$ );
-    }
+    'launcher.render': ( [ source$ ] ) => source$.subscribe( launcher.output$ ),
+
+    'launcher.listview.chosen': () => launcher.listview.chosen$
   };
 }
