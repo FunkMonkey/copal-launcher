@@ -1,6 +1,6 @@
 import Cycle from 'cycle-react';
 import React from 'react';
-import Rx from 'rx';
+import Rx from 'rxjs/Rx';
 
 export function component( displayName, definitionFn, options ) {
   return Cycle.component( displayName, ( interactions, properties, comp,
@@ -10,11 +10,11 @@ export function component( displayName, definitionFn, options ) {
                                 comp, lifecycles, renderScheduler );
 
     if ( Rx.Observable.isObservable( sinks ) ) {
-      cycle.sinks.onNext( { dom$: sinks } );
+      cycle.sinks.next( { dom$: sinks } );
       return sinks;
     }
 
-    cycle.sinks.onNext( sinks );
+    cycle.sinks.next( sinks );
     return sinks.dom$;
   }, options );
 }

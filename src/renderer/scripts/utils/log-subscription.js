@@ -1,5 +1,5 @@
 import R from 'ramda';
-import Rx from 'rx';
+import Rx from 'rxjs/Rx';
 
 export default R.curry( ( name, source$ ) => Rx.Observable.create( observer => {
   console.log( `Observable '${name}' subscribed to` );

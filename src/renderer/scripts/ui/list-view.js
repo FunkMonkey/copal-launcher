@@ -2,14 +2,16 @@ import cn from 'classnames';
 import keycode from 'keycode';
 import R from 'ramda';
 import React from 'react';
-import Rx from 'rx';
+import Rx from 'rxjs/Rx';
 
-import * as Cyclic from '../utils/cyclic';
+import createReactiveComponent from '../utils/create-reactive-component';
+import AutoBoundSubject from '../utils/rx/auto-bound-subject';
 
-export default Cyclic.component( 'ListView', ( model, actions ) => {
-  const data$ = model.data$.startWith( [] ).share();
 
-  const onKeyDown$ = actions.get( 'onKeyDown' );
+function definition( sources ) {
+  const data$ = sources.data$.startWith( [] ).share();
+
+  const onKeyDown$ = new AutoBoundSubject();
   const onDownArrow$ = onKeyDown$.filter( e => keycode( e ) === 'down' );
   const onUpArrow$ = onKeyDown$.filter( e => keycode( e ) === 'up' );
   const onEnter$ = onKeyDown$.filter( e => keycode( e ) === 'enter' );
@@ -53,7 +55,7 @@ export default Cyclic.component( 'ListView', ( model, actions ) => {
     } );
 
   const selectIndexRequests$ = Rx.Observable.merge( selectedIndexFromChange$,
-                                                    model.selectIndex$ || Rx.Observable.empty() );
+                                                    sources.selectIndex$ || Rx.Observable.empty() );
 
   const selectedItemInfoFromRequest$ = selectIndexRequests$.withLatestFrom( data$,
     ( index, data ) => {
@@ -76,18 +78,19 @@ export default Cyclic.component( 'ListView', ( model, actions ) => {
 
     const domSubscription = Rx.Observable.combineLatest( data$, selectedItemInfo$,
       ( data, selectedItemInfo ) => {
-        const listItems = data.map( ( d, i ) =>
+        const listItems = data.map( ( d, i ) => (
           <div
             className={cn( 'list-item', { 'is-selected': i === ( selectedItemInfo ? selectedItemInfo.index : -1 ) } )}
             key={d}
-          >{d}</div> );
+          >{d}</div> )
+        );
 
         return (
           <div
             className="copal-list-view"
             ref={node => { domNode = node; }}
             tabIndex="0"
-            onKeyDown={actions.listener( 'onKeyDown' )}
+            onKeyDown={onKeyDown$.next}
             // onClick={actions.listener( 'onClick' )}
           >
             {listItems}
@@ -96,7 +99,7 @@ export default Cyclic.component( 'ListView', ( model, actions ) => {
       } )
       .subscribe( observer );
 
-    const focus$ = model.focus$ ? model.focus$.do( () => domNode && domNode.focus() ) : Rx.Observable.just( '' );
+    const focus$ = sources.focus$ ? sources.focus$.do( () => domNode && domNode.focus() ) : Rx.Observable.of( '' );
     const focusSubscription = focus$.subscribe( () => {} );
     return () => {
       domSubscription.dispose();
@@ -104,5 +107,10 @@ export default Cyclic.component( 'ListView', ( model, actions ) => {
     };
   } );
 
-  return { dom$, chosenListItem$ };
+  return { view: dom$, chosenListItem$ };
+}
+
+export default createReactiveComponent( {
+  displayName: 'ListView',
+  definition
 } );

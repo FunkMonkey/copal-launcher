@@ -1,38 +1,71 @@
 import React from 'react';
-import Rx from 'rx';
+import Rx from 'rxjs/Rx';
 
-import * as Cyclic from '../utils/cyclic';
+import createReactiveComponent from '../utils/create-reactive-component';
+
+// import * as Cyclic from '../utils/cyclic';
 import Input from './input';
 import ListView from './list-view';
 
-export default Cyclic.component( 'Main', model => {
-  const launcher = model.launcher;
+// const Test = createReactiveComponent( {
+//   displayName: 'Test',
+//   definition( sources ) {
+//     return {
+//       view: sources.name$.map( val => <h1>Hello {val}</h1> ),
+//       event$: Rx.Observable.interval( 5000 ).map( val => 'Foo ' + val )
+//     };
+//   }
+// } );
 
-  const input = Cyclic.instance( Input, { value$: launcher.input.to$,
-                                          focus$: launcher.input.focus$ } );
-  input.getEvent( 'value$' ).subscribe( launcher.input.from$ );
-  const inputOnUserExit$ = input.getEvent( 'onUserExit$' ).share();
+// class Listing extends React.Component {
+//   render() {
+//     return <div>{this.props.hello}</div>;
+//   }
+// }
+
+function definition( { launcher } ) {
+  // return Rx.Observable.just( <Listing hello="foo" /> ).tap( x => console.log(x) );
+
+  const inputOutValue$ = new Rx.Subject();
+  inputOutValue$.switchMap( x => x ).subscribe( launcher.input.from$ );
+
+  const onUserExitSub$ = new Rx.Subject();
+  const onUserExit$ = onUserExitSub$.share();
 
   const selectIndex$ = Rx.Observable.merge( launcher.listview.selectIndex$,
-                                            inputOnUserExit$.map( () => 0 ) );
-  const listView = Cyclic.instance( ListView, { data$: launcher.output$,
-                                                selectIndex$,
-                                                focus$: inputOnUserExit$ } );
+                                            onUserExit$.map( () => 0 ) );
 
-  listView.getEvent( 'chosenListItem$' ).subscribe( launcher.listview.chosen$ );
+  const chosenListItem$ = new Rx.Subject();
+  chosenListItem$.subscribe( launcher.listview.chosen$ );
 
-  return Rx.Observable.just(
-    <div className="copal-main">
-      <div className="copal-main-settings-button">...</div>
+  return {
+    view: Rx.Observable.of(
+      <div className="copal-main">
+        <div className="copal-main-settings-button">...</div>
 
-      <div className="copal-main-top-row copal-dark-box">
-        <button className="copal-main-command">NAME</button>
-        {input}
+        <div className="copal-main-top-row copal-dark-box">
+          <button className="copal-main-command">NAME</button>
+          <Input
+            value$={launcher.input.to$}
+            focus$={launcher.input.focus$}
+            outValue$={inputOutValue$}
+            onUserExit$={onUserExitSub$}
+          />
+        </div>
+
+        <div className="copal-main-resultbox copal-dark-box">
+          <ListView
+            data$={launcher.output$}
+            selectIndex$={selectIndex$}
+            focus$={onUserExit$}
+            chosenListItem$={chosenListItem$}
+          />
+        </div>
       </div>
+    ) };
+}
 
-      <div className="copal-main-resultbox copal-dark-box">
-        {listView}
-      </div>
-    </div>
-   );
+export default createReactiveComponent( {
+  displayName: 'Main',
+  definition
 } );

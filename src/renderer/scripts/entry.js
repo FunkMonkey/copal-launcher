@@ -1,12 +1,13 @@
 import fs from 'fs';
 import path from 'path';
+import React from 'react';
 import ReactDOM from 'react-dom';
-import Rx from 'rx';
+import Rx from 'rxjs/Rx';
 import createDesktopDrivers from '@copal/drivers-desktop';
 import CopalCore from '@copal/core';
 import getBasicOperators from './basic-operators';
 
-import * as Cyclic from './utils/cyclic';
+// import * as Cyclic from './utils/cyclic';
 import Main from './ui/main';
 
 function createLauncher() {
@@ -38,21 +39,19 @@ function createLauncher() {
     core,
     init() {
       return core.init()
-        .doOnCompleted( () => {
+        .do( null, null, () => {
           core.addOperators( getBasicOperators( this ) );
           console.log( 'Finished core initialization' );
 
-          const main = Cyclic.instance( Main, { launcher: this } );
-
-          ReactDOM.render( main, document.querySelector( '.copal-content' ) );
+          ReactDOM.render( <Main launcher={this} />, document.querySelector( '.copal-content' ) );
           console.log( 'Finished render initialization' );
         } );
     },
 
     resetUI() {
-      this.input.focus$.onNext();
-      this.input.to$.onNext( '' );
-      this.listview.selectIndex$.onNext( -1 );
+      this.input.focus$.next();
+      this.input.to$.next( '' );
+      this.listview.selectIndex$.next( -1 );
     },
 
     executeCommand( commandName ) {

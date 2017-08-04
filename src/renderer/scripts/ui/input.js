@@ -1,39 +1,46 @@
 import keycode from 'keycode';
 import React from 'react';
-import Rx from 'rx';
+import Rx from 'rxjs/Rx';
 
-import * as Cyclic from '../utils/cyclic';
+import createReactiveComponent from '../utils/create-reactive-component';
+import AutoBoundSubject from '../utils/rx/auto-bound-subject';
 
-export default Cyclic.component( 'CopalInput', ( model, actions ) => {
-  const value$ = actions.get( 'onChange' )
+function definition( sources ) {
+  const onChange$ = new AutoBoundSubject();
+  const value$ = onChange$
     .map( ev => ev.target.value );
 
-  const onKeyDown$ = actions.get( 'onInputKeyDown' );
+  const onKeyDown$ = new AutoBoundSubject();
   const onUserExit$ = onKeyDown$.filter( e => keycode( e ) === 'down' );
 
   let domNode = null;
 
-  const dom$ = Rx.Observable.merge( value$, model.value$ )
+  const dom$ = Rx.Observable.merge( value$, sources.value$ )
     .distinctUntilChanged()
-    .map( value =>
+    .map( value => (
       <input
         autoFocus
         ref={node => { domNode = node; }}
         type="edit"
         className="copal-main-input"
         value={value}
-        onChange={actions.listener( 'onChange' )}
-        onKeyDown={actions.listener( 'onInputKeyDown' )}
-      />
+        onChange={onChange$.next}
+        onKeyDown={onKeyDown$.next}
+      /> )
     );
 
-  const focus$ = model.focus$ ? model.focus$.do( () => domNode && domNode.focus() ) :
-                                Rx.Observable.empty();
+  const focus$ = sources.focus$ ? sources.focus$.do( () => domNode && domNode.focus() ) :
+    Rx.Observable.empty();
 
 
   return {
-    dom$: Rx.Observable.merge( dom$, focus$.ignoreElements() ),
-    value$,
+    view: Rx.Observable.merge( dom$, focus$.ignoreElements() ),
+    outValue$: value$,
     onUserExit$
   };
+}
+
+export default createReactiveComponent( {
+  displayName: 'CopalInput',
+  definition
 } );
