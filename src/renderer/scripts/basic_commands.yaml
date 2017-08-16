@@ -5,16 +5,19 @@
     core:
       pipegroups:
         commandsNames$:
-          - [ [launcher::query$], core.getCommandNames ]
+          - sources: [ launcher::query$ ]
+            operator: core.getCommandNames
     launcher:
       pipegroups:
         query$:
-          - [ null, launcher.fromInput ]
+          - operator: launcher.fromInput
         output$:
-          - [ [core::commandsNames$], launcher.render ]
+          - sources: [ core::commandsNames$ ]
+            operator: launcher.render
         chosenCommand$:
-          - [ null, launcher.listview.chosen ]
+          - operator: launcher.listview.chosen
         executeCommand$:
-          - [ [ chosenCommand$ ], launcher.executeCommand ]
-          - [ null, subscribe ]
+          - sources: [ chosenCommand$ ]
+            operator: launcher.executeCommand
+          - operator: subscribe
 - name: foobar
