@@ -26,17 +26,17 @@ import ListView from './list-view';
 function definition( { launcher } ) {
   // return Rx.Observable.just( <Listing hello="foo" /> ).tap( x => console.log(x) );
 
-  const inputOutValue$ = new Rx.Subject();
+  const inputOutValue$ = new Rx.ReplaySubject( 1 );
   inputOutValue$.switchMap( x => x ).subscribe( launcher.input.from$ );
 
-  const onUserExitSub$ = new Rx.Subject();
-  const onUserExit$ = onUserExitSub$.share();
+  const onUserExitSub$ = new Rx.ReplaySubject( 1 );
+  const onUserExit$ = onUserExitSub$.switchMap( x => x ).share();
 
   const selectIndex$ = Rx.Observable.merge( launcher.listview.selectIndex$,
                                             onUserExit$.map( () => 0 ) );
-
-  const chosenListItem$ = new Rx.Subject();
-  chosenListItem$.subscribe( launcher.listview.chosen$ );
+  const chosenListItem$ = new Rx.ReplaySubject( 1 );
+  // TODO: handle subscription
+  chosenListItem$.switchMap( x => x ).subscribe( launcher.listview.chosen$ );
 
   return {
     view: Rx.Observable.of(
