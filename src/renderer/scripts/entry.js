@@ -6,6 +6,7 @@ import Rx from 'rxjs/Rx';
 import createDesktopDrivers from '@copal/drivers-desktop';
 import CopalCore from '@copal/core';
 import getBasicOperators from './basic-operators';
+import yaml from 'js-yaml';
 
 // import * as Cyclic from './utils/cyclic';
 import Main from './ui/main';
@@ -19,6 +20,11 @@ function createLauncher() {
     } }
   );
   const core = new CopalCore( drivers );
+
+  // TODO: make asynchronous
+  const basicCommands = yaml.safeLoad( fs.readFileSync( path.join( __dirname, 'basic_commands.yaml' ), 'utf8' ) );
+
+  console.log( basicCommands );
 
   return {
     currCommand: null,
@@ -41,6 +47,7 @@ function createLauncher() {
       return core.init()
         .do( null, null, () => {
           core.addOperators( getBasicOperators( this ) );
+          core.addCommandConfigs( basicCommands );
           console.log( 'Finished core initialization' );
 
           ReactDOM.render( <Main launcher={this} />, document.querySelector( '.copal-content' ) );

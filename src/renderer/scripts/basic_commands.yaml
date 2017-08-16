@@ -1,0 +1,20 @@
+---
+- name: commands
+  description: Shows a list of available commands
+  components:
+    core:
+      pipegroups:
+        commandsNames$:
+          - [ [launcher::query$], core.getCommandNames ]
+    launcher:
+      pipegroups:
+        query$:
+          - [ null, launcher.fromInput ]
+        output$:
+          - [ [core::commandsNames$], launcher.render ]
+        chosenCommand$:
+          - [ null, launcher.listview.chosen ]
+        executeCommand$:
+          - [ [ chosenCommand$ ], launcher.executeCommand ]
+          - [ null, subscribe ]
+- name: foobar
