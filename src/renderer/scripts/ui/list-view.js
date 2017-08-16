@@ -102,8 +102,8 @@ function definition( sources ) {
     const focus$ = sources.focus$ ? sources.focus$.do( () => domNode && domNode.focus() ) : Rx.Observable.of( '' );
     const focusSubscription = focus$.subscribe( () => {} );
     return () => {
-      domSubscription.dispose();
-      focusSubscription.dispose();
+      domSubscription.unsubscribe();
+      focusSubscription.unsubscribe();
     };
   } );
 
