@@ -24,8 +24,6 @@ function createLauncher() {
   // TODO: make asynchronous
   const basicCommands = yaml.safeLoad( fs.readFileSync( path.join( __dirname, 'basic_commands.yaml' ), 'utf8' ) );
 
-  console.log( basicCommands );
-
   return {
     currCommand: null,
 
