@@ -3,21 +3,51 @@
   description: Shows a list of available commands
   components:
     core:
-      pipegroups:
-        commandsNames$:
-          - sources: [ launcher::query$ ]
-            operator: core.getCommandNames
+
+      commandsNames$:
+        - operator: core.getCommandNames
+          sources: [ launcher::query$ ]
+
     launcher:
-      pipegroups:
-        query$:
-          - operator: launcher.fromInput
-        output$:
-          - sources: [ core::commandsNames$ ]
-            operator: launcher.render
-        chosenCommand$:
-          - operator: launcher.listview.chosen
-        executeCommand$:
-          - sources: [ chosenCommand$ ]
-            operator: launcher.executeCommand
-          - operator: subscribe
+
+      query$:
+        - operator: launcher.fromInput
+
+      output$:
+        - operator: launcher.render
+          sources: [ core::commandsNames$ ]
+
+      chosenCommand$:
+        - operator: launcher.listview.chosen
+
+      executeCommand$:
+        - operator: launcher.executeCommand
+          sources: [ chosenCommand$ ]
+        - operator: subscribe
+
 - name: foobar
+  description: Shows a list of available commands
+  components:
+    core:
+
+      commandsNames$:
+        - operator: core.getCommandNames
+          sources: [ launcher::query$ ]
+
+    launcher:
+
+      query$:
+        - operator: launcher.fromInput
+
+      output$:
+        - operator: launcher.render
+          sources: [ core::commandsNames$ ]
+
+      chosenCommand$:
+        - operator: launcher.listview.chosen
+
+      executeCommand$:
+        - operator: launcher.executeCommand
+          sources: [ chosenCommand$ ]
+        - operator: subscribe
+          args: [null, null, null]

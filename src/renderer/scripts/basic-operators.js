@@ -1,7 +1,3 @@
-// import Rx from 'rx';
-
-import logSubscription from './utils/log-subscription';
-
 export default function ( launcher ) {
   return {
     'launcher.executeCommand': ( [ commandName$ ] ) =>
@@ -9,7 +5,8 @@ export default function ( launcher ) {
 
     'launcher.fromInput': () => launcher.input.from$.startWith( '' ),
 
-    'launcher.render': ( [ source$ ] ) => source$.subscribe( launcher.output$ ),
+    // TODO: make output$ reusable
+    'launcher.render': ( [ source$ ] ) => source$.subscribe( launcher.output$.next /* , launcher.outputError$.next */ ),
 
     'launcher.listview.chosen': () => launcher.listview.chosen$
   };

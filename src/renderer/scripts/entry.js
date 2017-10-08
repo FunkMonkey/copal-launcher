@@ -7,6 +7,7 @@ import createDesktopDrivers from '@copal/drivers-desktop';
 import CopalCore from '@copal/core';
 import getBasicOperators from './basic-operators';
 import yaml from 'js-yaml';
+import AutoBoundSubject from './utils/rx/auto-bound-subject';
 
 // import * as Cyclic from './utils/cyclic';
 import Main from './ui/main';
@@ -27,13 +28,16 @@ function createLauncher() {
   return {
     currCommand: null,
 
+    nameText$: new Rx.Subject(),
+
     input: {
       from$: new Rx.Subject(),
       to$: new Rx.Subject(),
       focus$: new Rx.Subject()
     },
 
-    output$: new Rx.Subject(),
+    output$: new AutoBoundSubject(),
+    outputError$: new AutoBoundSubject(),
 
     listview: {
       chosen$: new Rx.Subject(),
@@ -65,7 +69,12 @@ function createLauncher() {
 
       this.resetUI();
 
-      this.currCommand = core.executeCommand( commandName );
+      // do this in the next tick, so errors from executeCommand are not
+      // forwarded to the previously disposed command
+      setTimeout( () => {
+        this.currCommand = core.executeCommand( commandName );
+        this.nameText$.next( commandName );
+      }, 0 );
     }
   };
 }

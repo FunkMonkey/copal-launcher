@@ -3,25 +3,9 @@ import Rx from 'rxjs/Rx';
 
 import createReactiveComponent from '../utils/create-reactive-component';
 
-// import * as Cyclic from '../utils/cyclic';
+import CommandButton from './command-button';
 import Input from './input';
 import ListView from './list-view';
-
-// const Test = createReactiveComponent( {
-//   displayName: 'Test',
-//   definition( sources ) {
-//     return {
-//       view: sources.name$.map( val => <h1>Hello {val}</h1> ),
-//       event$: Rx.Observable.interval( 5000 ).map( val => 'Foo ' + val )
-//     };
-//   }
-// } );
-
-// class Listing extends React.Component {
-//   render() {
-//     return <div>{this.props.hello}</div>;
-//   }
-// }
 
 function definition( { launcher } ) {
   // return Rx.Observable.just( <Listing hello="foo" /> ).tap( x => console.log(x) );
@@ -44,7 +28,7 @@ function definition( { launcher } ) {
         <div className="copal-main-settings-button">...</div>
 
         <div className="copal-main-top-row copal-dark-box">
-          <button className="copal-main-command">NAME</button>
+          <CommandButton text$={launcher.nameText$} />
           <Input
             value$={launcher.input.to$}
             focus$={launcher.input.focus$}
