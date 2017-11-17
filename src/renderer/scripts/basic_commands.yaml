@@ -1,53 +1,24 @@
 ---
 - name: commands
   description: Shows a list of available commands
+
   components:
-    core:
+    - core
+    - launcher
 
-      commandsNames$:
-        - operator: core.getCommandNames
-          sources: [ launcher::query$ ]
-
-    launcher:
-
-      query$:
-        - operator: launcher.fromInput
-
-      output$:
-        - operator: launcher.render
-          sources: [ core::commandsNames$ ]
-
-      chosenCommand$:
-        - operator: launcher.listview.chosen
-
-      executeCommand$:
-        - operator: launcher.executeCommand
-          sources: [ chosenCommand$ ]
-        - operator: subscribe
+  connections:
+    "launcher::query$": "core::commandQuery$"
+    "core::commandNames$": "launcher::data$"
+    "launcher::chosenListenItem$": "launcher::commandToExecute$"
 
 - name: foobar
   description: Shows a list of available commands
+
   components:
-    core:
+    - core
+    - launcher
 
-      commandsNames$:
-        - operator: core.getCommandNames
-          sources: [ launcher::query$ ]
-
-    launcher:
-
-      query$:
-        - operator: launcher.fromInput
-
-      output$:
-        - operator: launcher.render
-          sources: [ core::commandsNames$ ]
-
-      chosenCommand$:
-        - operator: launcher.listview.chosen
-
-      executeCommand$:
-        - operator: launcher.executeCommand
-          sources: [ chosenCommand$ ]
-        - operator: subscribe
-          args: [null, null, null]
+  connections:
+    "launcher::query$": "core::commandQuery$"
+    "core::commandNames$": "launcher::data$"
+    "launcher::chosenListenItem$": "launcher::commandToExecute$"

@@ -24,6 +24,7 @@ function createLauncher() {
 
   // TODO: make asynchronous
   const basicCommands = yaml.safeLoad( fs.readFileSync( path.join( __dirname, 'basic_commands.yaml' ), 'utf8' ) );
+  const basicComponents = yaml.safeLoad( fs.readFileSync( path.join( __dirname, 'basic_components.yaml' ), 'utf8' ) );
 
   return {
     currCommand: null,
@@ -50,6 +51,7 @@ function createLauncher() {
         .do( null, null, () => {
           core.addOperators( getBasicOperators( this ) );
           core.addCommandConfigs( basicCommands );
+          core.addComponentConfigs( basicComponents );
           console.log( 'Finished core initialization' );
 
           ReactDOM.render( <Main launcher={this} />, document.querySelector( '.copal-content' ) );

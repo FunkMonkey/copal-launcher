@@ -1,0 +1,30 @@
+---
+- name: core
+  description: CoPal core component
+
+  graph:
+    commandNames$:
+      - input: commandQuery$
+      - operator: core.getCommandNames
+      - output: commandNames$
+
+- name: launcher
+  description: CoPal launcher
+
+  graph:
+    query$:
+      - operator: launcher.fromInput
+      - output: query$
+
+    render$:
+      - input: data$
+      - operator: launcher.render
+
+    chosenListenItem$:
+      - operator: launcher.listview.chosen
+      - output: chosenListenItem$
+
+    executeCommand$:
+      - input: commandToExecute$
+      - operator: launcher.executeCommand
+      - operator: subscribe
