@@ -23,8 +23,7 @@ function createLauncher() {
   const core = new CopalCore( drivers );
 
   // TODO: make asynchronous
-  const basicCommands = yaml.safeLoad( fs.readFileSync( path.join( __dirname, 'basic_commands.yaml' ), 'utf8' ) );
-  const basicComponents = yaml.safeLoad( fs.readFileSync( path.join( __dirname, 'basic_components.yaml' ), 'utf8' ) );
+  const basicGraphs = yaml.safeLoad( fs.readFileSync( path.join( __dirname, 'basic-graphs.yaml' ), 'utf8' ) );
 
   return {
     currCommand: null,
@@ -50,8 +49,7 @@ function createLauncher() {
       return core.init()
         .do( null, null, () => {
           core.addOperators( getBasicOperators( this ) );
-          core.addCommandConfigs( basicCommands );
-          core.addComponentConfigs( basicComponents );
+          core.addGraphTemplates( basicGraphs );
           console.log( 'Finished core initialization' );
 
           ReactDOM.render( <Main launcher={this} />, document.querySelector( '.copal-content' ) );
@@ -65,24 +63,25 @@ function createLauncher() {
       this.listview.selectIndex$.next( -1 );
     },
 
-    executeCommand( commandName ) {
+    executeCommandGraph( commandName ) {
       if ( this.currCommand )
-        core.disposeCommand( this.currCommand );
+        core.disposeCommandGraph( this.currCommand );
 
       this.resetUI();
 
       // do this in the next tick, so errors from executeCommand are not
       // forwarded to the previously disposed command
       setTimeout( () => {
-        this.currCommand = core.executeCommand( commandName );
+        this.currCommand = core.executeCommandGraph( commandName );
         this.nameText$.next( commandName );
       }, 0 );
     }
   };
 }
 
+// eslint-disable-next-line import/prefer-default-export
 export function init() {
   const launcher = createLauncher();
   launcher.init()
-    .subscribe( () => {}, null, () => { launcher.executeCommand( 'commands' ); } );
+    .subscribe( () => {}, null, () => { launcher.executeCommandGraph( 'commands' ); } );
 }

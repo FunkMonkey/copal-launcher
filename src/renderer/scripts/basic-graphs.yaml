@@ -1,0 +1,72 @@
+---
+- name: core
+  description: CoPal core component
+  hidden: true
+
+  graph:
+    commandNames$:
+      - from-input: commandQuery$
+      - operator: core.getCommandNames
+      - to-output: commandNames$
+
+- name: launcher
+  description: CoPal launcher
+  hidden: true
+
+  graph:
+    query$:
+      - operator: launcher.fromInput
+      - to-output: query$
+
+    render$:
+      - from-input: data$
+      - operator: launcher.render
+
+    chosenListenItem$:
+      - operator: launcher.listview.chosen
+      - to-output: chosenListenItem$
+
+    executeCommand$:
+      - from-input: commandToExecute$
+      - operator: launcher.executeCommandGraph
+      - operator: subscribe
+
+- name: commands
+  description: Shows a list of available commands
+
+  subgraphs:
+    - core
+    - launcher
+
+  graph:
+    connect-query:
+      - from-subgraph-output: launcher::query$
+      - to-subgraph-input: core::commandQuery$
+
+    connect-data:
+      - from-subgraph-output: core::commandNames$
+      - to-subgraph-input: launcher::data$
+
+    connect-execution:
+      - from-subgraph-output: launcher::chosenListenItem$
+      - to-subgraph-input: launcher::commandToExecute$
+
+- name: foobar
+  description: Shows a list of available commands
+
+  subgraphs:
+    - core
+    - launcher
+
+  graph:
+    connect-query:
+      - from-subgraph-output: launcher::query$
+      - to-subgraph-input: core::commandQuery$
+
+    connect-data:
+      - from-subgraph-output: core::commandNames$
+      - to-subgraph-input: launcher::data$
+
+    connect-execution:
+      - from-subgraph-output: launcher::chosenListenItem$
+      - to-subgraph-input: launcher::commandToExecute$
