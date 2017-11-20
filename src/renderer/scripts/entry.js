@@ -82,6 +82,7 @@ function createLauncher() {
 // eslint-disable-next-line import/prefer-default-export
 export function init() {
   const launcher = createLauncher();
+  // TODO: find out, why error gets eaten here
   launcher.init()
-    .subscribe( () => {}, null, () => { launcher.executeCommandGraph( 'commands' ); } );
+    .subscribe( () => {}, err => { console.error( err ); }, () => { launcher.executeCommandGraph( 'commands' ); } );
 }
