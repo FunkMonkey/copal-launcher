@@ -26,9 +26,9 @@
       - operator: launcher.listview.chosen
       - to-output: chosenListenItem$
 
-    executeCommand$:
+    instantiateCommand$:
       - from-input: commandToExecute$
-      - operator: launcher.executeCommandGraph
+      - operator: launcher.instantiateCommand
       - operator: subscribe
 
 - name: commands

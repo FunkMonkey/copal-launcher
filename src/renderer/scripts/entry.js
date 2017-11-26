@@ -1,12 +1,12 @@
 import fs from 'fs';
 import path from 'path';
+import yaml from 'js-yaml';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import Rx from 'rxjs/Rx';
 import createDesktopDrivers from '@copal/drivers-desktop';
 import CopalCore from '@copal/core';
 import getBasicOperators from './basic-operators';
-import yaml from 'js-yaml';
 import AutoBoundSubject from './utils/rx/auto-bound-subject';
 
 // import * as Cyclic from './utils/cyclic';
@@ -23,7 +23,7 @@ function createLauncher() {
   const core = new CopalCore( drivers );
 
   // TODO: make asynchronous
-  const basicGraphs = yaml.safeLoad( fs.readFileSync( path.join( __dirname, 'basic-graphs.yaml' ), 'utf8' ) );
+  const basicComponents = yaml.safeLoad( fs.readFileSync( path.join( __dirname, 'basic-graphs.yaml' ), 'utf8' ) );
 
   return {
     currCommand: null,
@@ -48,8 +48,8 @@ function createLauncher() {
     init() {
       return core.init()
         .do( null, null, () => {
-          core.addOperators( getBasicOperators( this ) );
-          core.addGraphTemplates( basicGraphs );
+          core.commands.connector.addOperators( getBasicOperators( this ) );
+          core.commands.templates.addComponents( basicComponents );
           console.log( 'Finished core initialization' );
 
           ReactDOM.render( <Main launcher={this} />, document.querySelector( '.copal-content' ) );
@@ -63,16 +63,16 @@ function createLauncher() {
       this.listview.selectIndex$.next( -1 );
     },
 
-    executeCommandGraph( commandName ) {
+    instantiateCommand( commandName ) {
       if ( this.currCommand )
-        core.disposeCommandGraph( this.currCommand );
+        core.commands.destroy( this.currCommand );
 
       this.resetUI();
 
       // do this in the next tick, so errors from executeCommand are not
       // forwarded to the previously disposed command
       setTimeout( () => {
-        this.currCommand = core.executeCommandGraph( commandName );
+        this.currCommand = core.commands.instantiate( commandName );
         this.nameText$.next( commandName );
       }, 0 );
     }
@@ -84,5 +84,5 @@ export function init() {
   const launcher = createLauncher();
   // TODO: find out, why error gets eaten here
   launcher.init()
-    .subscribe( () => {}, err => { console.error( err ); }, () => { launcher.executeCommandGraph( 'commands' ); } );
+    .subscribe( () => {}, err => { console.error( err ); }, () => { launcher.instantiateCommand( 'commands' ); } );
 }

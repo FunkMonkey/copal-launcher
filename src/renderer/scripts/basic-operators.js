@@ -1,7 +1,7 @@
 export default function ( launcher ) {
   return {
-    'launcher.executeCommandGraph': ( [ commandName$ ] ) =>
-      commandName$.map( commandName => launcher.executeCommandGraph( commandName ) ),
+    'launcher.instantiateCommand': ( [ commandName$ ] ) =>
+      commandName$.map( commandName => launcher.instantiateCommand( commandName ) ),
 
     'launcher.fromInput': () => launcher.input.from$.startWith( '' ),
 
