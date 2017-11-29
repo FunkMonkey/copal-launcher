@@ -4,7 +4,7 @@ import yaml from 'js-yaml';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import Rx from 'rxjs/Rx';
-import createDesktopDrivers from '@copal/drivers-desktop';
+import { loaders } from 'reactive-plugin-system';
 import CopalCore from '@copal/core';
 import getBasicOperators from './basic-operators';
 import AutoBoundSubject from './utils/rx/auto-bound-subject';
@@ -13,14 +13,14 @@ import AutoBoundSubject from './utils/rx/auto-bound-subject';
 import Main from './ui/main';
 
 function createLauncher() {
-  const drivers = createDesktopDrivers( {
+  const core = new CopalCore( {
     profile: {
       // TODO: read from command-line or localStorage or something
-      dir: path.join( __dirname, '..', '..', '..', '..', '..', '..', 'profile' ),
+      directory: path.join( __dirname, '..', '..', '..', '..', '..', '..', 'profile' ),
       fs
-    } }
-  );
-  const core = new CopalCore( drivers );
+    },
+    getPluginFactory: loaders.require
+  } );
 
   // TODO: make asynchronous
   const basicComponents = yaml.safeLoad( fs.readFileSync( path.join( __dirname, 'basic-graphs.yaml' ), 'utf8' ) );
