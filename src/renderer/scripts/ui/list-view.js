@@ -7,6 +7,19 @@ import Rx from 'rxjs/Rx';
 import createReactiveComponent from '../utils/create-reactive-component';
 import AutoBoundSubject from '../utils/rx/auto-bound-subject';
 
+function getDatumKey( datum, index ) {
+  if ( typeof datum === 'string' )
+    return index;
+
+  return datum.id || index;
+}
+
+function getDatumTitle( datum ) {
+  if ( typeof datum === 'string' )
+    return datum;
+
+  return datum.title;
+}
 
 function definition( sources ) {
   const data$ = sources.data$.startWith( [] ).share();
@@ -81,13 +94,15 @@ function definition( sources ) {
         const listItems = data.map( ( d, i ) => (
           <div
             className={cn( 'list-item', { 'is-selected': i === ( selectedItemInfo ? selectedItemInfo.index : -1 ) } )}
-            key={d}
-          >{d}</div> )
-        );
+            key={getDatumKey( d, i )}
+          >
+            {getDatumTitle( d )}
+          </div> ) );
 
         return (
           <div
             className="copal-list-view"
+            role="presentation"
             ref={node => { domNode = node; }}
             tabIndex="0"
             onKeyDown={onKeyDown$.next}
