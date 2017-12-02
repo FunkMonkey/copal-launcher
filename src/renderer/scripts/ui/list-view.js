@@ -2,10 +2,10 @@ import cn from 'classnames';
 import keycode from 'keycode';
 import R from 'ramda';
 import React from 'react';
-import Rx from 'rxjs/Rx';
+import { Observable, Subject } from 'rxjs';
 
 import createReactiveComponent from '../utils/create-reactive-component';
-import AutoBoundSubject from '../utils/rx/auto-bound-subject';
+import bindObserver from '../utils/rx/bind-observer';
 
 function getDatumKey( datum, index ) {
   if ( typeof datum === 'string' )
@@ -24,15 +24,15 @@ function getDatumTitle( datum ) {
 function definition( sources ) {
   const data$ = sources.data$.startWith( [] ).share();
 
-  const onKeyDown$ = new AutoBoundSubject();
+  const onKeyDown$ = bindObserver( new Subject() );
   const onDownArrow$ = onKeyDown$.filter( e => keycode( e ) === 'down' );
   const onUpArrow$ = onKeyDown$.filter( e => keycode( e ) === 'up' );
   const onEnter$ = onKeyDown$.filter( e => keycode( e ) === 'enter' );
 
-  const changeSelectedIndexBy$ = Rx.Observable.merge( onDownArrow$.map( () => 1 ),
+  const changeSelectedIndexBy$ = Observable.merge( onDownArrow$.map( () => 1 ),
                                                       onUpArrow$.map( () => -1 ) );
 
-  const _selectedItemInfo$ = new Rx.Subject();
+  const _selectedItemInfo$ = new Subject();
   const selectedItemInfo$ = _selectedItemInfo$.startWith( null ).shareReplay( 1 );
 
   // TODO: use previously selected item?
@@ -67,8 +67,8 @@ function definition( sources ) {
       return ( nextIndex < numItems ) ? nextIndex : nextIndex - numItems;
     } );
 
-  const selectIndexRequests$ = Rx.Observable.merge( selectedIndexFromChange$,
-                                                    sources.selectIndex$ || Rx.Observable.empty() );
+  const selectIndexRequests$ = Observable.merge( selectedIndexFromChange$,
+                                                    sources.selectIndex$ || Observable.empty() );
 
   const selectedItemInfoFromRequest$ = selectIndexRequests$.withLatestFrom( data$,
     ( index, data ) => {
@@ -78,7 +78,7 @@ function definition( sources ) {
     } );
 
   // TODO: handle subscription
-  Rx.Observable.merge( selectedItemInfoFromData$, selectedItemInfoFromRequest$ )
+  Observable.merge( selectedItemInfoFromData$, selectedItemInfoFromRequest$ )
     .distinctUntilChanged()
     .subscribe( _selectedItemInfo$ );
 
@@ -86,10 +86,10 @@ function definition( sources ) {
     ( evt, selectedItemInfo ) => selectedItemInfo.item );
 
   // using Observable.create for focus subscription
-  const dom$ = Rx.Observable.create( observer => {
+  const dom$ = Observable.create( observer => {
     let domNode = null;
 
-    const domSubscription = Rx.Observable.combineLatest( data$, selectedItemInfo$,
+    const domSubscription = Observable.combineLatest( data$, selectedItemInfo$,
       ( data, selectedItemInfo ) => {
         const listItems = data.map( ( d, i ) => (
           <div
@@ -114,7 +114,7 @@ function definition( sources ) {
       } )
       .subscribe( observer );
 
-    const focus$ = sources.focus$ ? sources.focus$.do( () => domNode && domNode.focus() ) : Rx.Observable.of( '' );
+    const focus$ = sources.focus$ ? sources.focus$.do( () => domNode && domNode.focus() ) : Observable.of( '' );
     const focusSubscription = focus$.subscribe( () => {} );
     return () => {
       domSubscription.unsubscribe();

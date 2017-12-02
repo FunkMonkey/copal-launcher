@@ -5,7 +5,7 @@ import { Subject } from 'rxjs';
 import { loaders } from 'reactive-plugin-system';
 import Core from '@copal/core';
 import getBasicOperators from './basic-operators';
-import AutoBoundSubject from './utils/rx/auto-bound-subject';
+import bindObserver from './utils/rx/bind-observer';
 
 export default class Launcher {
   constructor() {
@@ -29,8 +29,8 @@ export default class Launcher {
       focus$: new Subject()
     };
 
-    this.output$ = new AutoBoundSubject();
-    this.outputError$ = new AutoBoundSubject();
+    this.output$ = bindObserver( new Subject() );
+    this.outputError$ = bindObserver( new Subject() );
 
     this.listview = {
       chosen$: new Subject(),

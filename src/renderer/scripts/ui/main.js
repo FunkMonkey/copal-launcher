@@ -1,5 +1,5 @@
 import React from 'react';
-import Rx from 'rxjs/Rx';
+import { Observable, ReplaySubject } from 'rxjs';
 
 import createReactiveComponent from '../utils/create-reactive-component';
 
@@ -8,22 +8,20 @@ import Input from './input';
 import ListView from './list-view';
 
 function definition( { launcher } ) {
-  // return Rx.Observable.just( <Listing hello="foo" /> ).tap( x => console.log(x) );
-
-  const inputOutValue$ = new Rx.ReplaySubject( 1 );
+  const inputOutValue$ = new ReplaySubject( 1 );
   inputOutValue$.switchMap( x => x ).subscribe( launcher.input.from$ );
 
-  const onUserExitSub$ = new Rx.ReplaySubject( 1 );
+  const onUserExitSub$ = new ReplaySubject( 1 );
   const onUserExit$ = onUserExitSub$.switchMap( x => x ).share();
 
-  const selectIndex$ = Rx.Observable.merge( launcher.listview.selectIndex$,
-                                            onUserExit$.map( () => 0 ) );
-  const chosenListItem$ = new Rx.ReplaySubject( 1 );
+  const selectIndex$ = Observable.merge( launcher.listview.selectIndex$,
+                                         onUserExit$.map( () => 0 ) );
+  const chosenListItem$ = new ReplaySubject( 1 );
   // TODO: handle subscription
   chosenListItem$.switchMap( x => x ).subscribe( launcher.listview.chosen$ );
 
   return {
-    view: Rx.Observable.of(
+    view: Observable.of(
       <div className="copal-main">
         <div className="copal-main-settings-button">...</div>
 
@@ -46,7 +44,8 @@ function definition( { launcher } ) {
           />
         </div>
       </div>
-    ) };
+    )
+  };
 }
 
 export default createReactiveComponent( {

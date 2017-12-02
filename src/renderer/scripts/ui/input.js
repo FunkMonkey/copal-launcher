@@ -1,21 +1,21 @@
 import keycode from 'keycode';
 import React from 'react';
-import Rx from 'rxjs/Rx';
+import { Observable, Subject } from 'rxjs';
 
 import createReactiveComponent from '../utils/create-reactive-component';
-import AutoBoundSubject from '../utils/rx/auto-bound-subject';
+import bindObserver from '../utils/rx/bind-observer';
 
 function definition( sources ) {
-  const onChange$ = new AutoBoundSubject();
+  const onChange$ = bindObserver( new Subject() );
   const value$ = onChange$
     .map( ev => ev.target.value );
 
-  const onKeyDown$ = new AutoBoundSubject();
+  const onKeyDown$ = bindObserver( new Subject() );
   const onUserExit$ = onKeyDown$.filter( e => keycode( e ) === 'down' );
 
   let domNode = null;
 
-  const dom$ = Rx.Observable.merge( value$, sources.value$ )
+  const dom$ = Observable.merge( value$, sources.value$ )
     .distinctUntilChanged()
     .map( value => (
       <input
@@ -30,11 +30,11 @@ function definition( sources ) {
     );
 
   const focus$ = sources.focus$ ? sources.focus$.do( () => domNode && domNode.focus() ) :
-    Rx.Observable.empty();
+    Observable.empty();
 
 
   return {
-    view: Rx.Observable.merge( dom$, focus$.ignoreElements() ),
+    view: Observable.merge( dom$, focus$.ignoreElements() ),
     outValue$: value$,
     onUserExit$
   };
