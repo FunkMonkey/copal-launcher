@@ -9,16 +9,16 @@ import ListView from './list-view';
 
 function definition( { launcher } ) {
   const inputOutValue$ = new ReplaySubject( 1 );
-  inputOutValue$.switchMap( x => x ).subscribe( launcher.input.from$ );
+  inputOutValue$.switch().subscribe( launcher.input.from$ );
 
   const onUserExitSub$ = new ReplaySubject( 1 );
-  const onUserExit$ = onUserExitSub$.switchMap( x => x ).share();
+  const onUserExit$ = onUserExitSub$.switch().share();
 
   const selectIndex$ = Observable.merge( launcher.listview.selectIndex$,
                                          onUserExit$.map( () => 0 ) );
   const chosenListItem$ = new ReplaySubject( 1 );
   // TODO: handle subscription
-  chosenListItem$.switchMap( x => x ).subscribe( launcher.listview.chosen$ );
+  chosenListItem$.switch().subscribe( launcher.listview.chosen$ );
 
   return {
     view: Observable.of(
