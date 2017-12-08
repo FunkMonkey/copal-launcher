@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import yaml from 'js-yaml';
 import { Subject } from 'rxjs';
-import { loaders } from 'reactive-plugin-system';
+import { factoryLoaders } from 'reactive-plugin-system';
 import Core from '@copal/core';
 import getBasicOperators from './basic-operators';
 import bindObserver from './utils/rx/bind-observer';
@@ -15,7 +15,7 @@ export default class Launcher {
         directory: path.join( __dirname, '..', '..', '..', '..', '..', '..', 'profile' ),
         fs
       },
-      getPluginFactory: loaders.require
+      getPluginFactory: factoryLoaders.require
     };
 
     this.core = new Core( coreOptions );
