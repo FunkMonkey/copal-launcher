@@ -1,11 +1,15 @@
 import fs from 'fs';
 import path from 'path';
 import yaml from 'js-yaml';
+// import R from 'ramda';
+// import React from 'react';
 import { Subject } from 'rxjs';
 import { factoryLoaders } from 'reactive-plugin-system';
 import Core from '@copal/core';
 import getBasicOperators from './basic-operators';
-import bindObserver from './utils/rx/bind-observer';
+// import bindObserver from './utils/rx/bind-observer';
+import MultiViewController from './ui/multi-view-controller';
+import ListviewFactory from './ui/viewfactories/listview';
 
 export default class Launcher {
   constructor() {
@@ -23,19 +27,23 @@ export default class Launcher {
     this.currCommand = null;
     this.nameText$ = new Subject();
 
+    this._resultViewController = new MultiViewController();
+    this.addViewFactory( 'listview', ListviewFactory );
+
     this.input = {
       from$: new Subject(),
       to$: new Subject(),
       focus$: new Subject()
     };
 
-    this.output$ = bindObserver( new Subject() );
-    this.outputError$ = bindObserver( new Subject() );
+    // this.output$ = bindObserver( new Subject() );
+    // this.outputError$ = bindObserver( new Subject() );
 
-    this.listview = {
-      chosen$: new Subject(),
-      selectIndex$: new Subject()
-    };
+    // this.addView( 'listview', {
+    //   data$: bindObserver( new Subject() ),
+    //   chosen$: new Subject(),
+    //   selectIndex$: new Subject()
+    // } );
   }
 
   init() {
@@ -49,10 +57,18 @@ export default class Launcher {
       } );
   }
 
+  addViewFactory( name, factory ) {
+    this._resultViewController.addViewFactory( name, factory );
+  }
+
+  getResultView( name ) {
+    return this._resultViewController.getView( name );
+  }
+
   resetUI() {
     this.input.focus$.next();
     this.input.to$.next( '' );
-    this.listview.selectIndex$.next( -1 );
+    // this.getResultView( 'listview' ).selectIndex$.next( -1 );
   }
 
   instantiateCommand( commandName ) {

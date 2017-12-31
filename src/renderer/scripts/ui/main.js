@@ -5,20 +5,20 @@ import createReactiveComponent from '../utils/create-reactive-component';
 
 import CommandButton from './command-button';
 import Input from './input';
-import ListView from './list-view';
+import MultiView from './multi-view';
 
 function definition( { launcher } ) {
   const inputOutValue$ = new ReplaySubject( 1 );
   inputOutValue$.switch().subscribe( launcher.input.from$ );
 
   const onUserExitSub$ = new ReplaySubject( 1 );
-  const onUserExit$ = onUserExitSub$.switch().share();
+  // const onUserExit$ = onUserExitSub$.switch().share();
 
-  const selectIndex$ = Observable.merge( launcher.listview.selectIndex$,
-                                         onUserExit$.map( () => 0 ) );
-  const chosenListItem$ = new ReplaySubject( 1 );
-  // TODO: handle subscription
-  chosenListItem$.switch().subscribe( launcher.listview.chosen$ );
+  // const selectIndex$ = Observable.merge( launcher.getView( 'listview' ).selectIndex$,
+  //                                        onUserExit$.map( () => 0 ) );
+  // const chosenListItem$ = new ReplaySubject( 1 );
+  // // TODO: handle subscription
+  // chosenListItem$.switch().subscribe( launcher.getView( 'listview' ).chosen$ );
 
   return {
     view: Observable.of(
@@ -36,17 +36,19 @@ function definition( { launcher } ) {
         </div>
 
         <div className="copal-main-resultbox copal-dark-box">
-          <ListView
-            data$={launcher.output$}
-            selectIndex$={selectIndex$}
-            focus$={onUserExit$}
-            chosenListItem$={chosenListItem$}
-          />
+          <MultiView controller={launcher._resultViewController} />
         </div>
       </div>
     )
   };
 }
+
+// <ListView
+//   data$={launcher.getView( 'listview' ).data$}
+//   selectIndex$={selectIndex$}
+//   focus$={onUserExit$}
+//   chosenListItem$={chosenListItem$}
+// />
 
 export default createReactiveComponent( {
   displayName: 'Main',

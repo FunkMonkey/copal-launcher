@@ -1,4 +1,12 @@
 import open from 'open';
+import { Observable } from 'rxjs';
+
+function connectObservableTo( observable$, observer ) {
+  return new Observable( () => {
+    const subscription = observable$.subscribe( observer );
+    return () => subscription.unsubscribe();
+  } );
+}
 
 export default function ( launcher ) {
   return {
@@ -8,9 +16,13 @@ export default function ( launcher ) {
     'launcher.fromInput': () => launcher.input.from$.startWith( '' ),
 
     // TODO: make output$ reusable
-    'launcher.render': ( [ source$ ] ) => source$.subscribe( launcher.output$.next /* , launcher.outputError$.next */ ),
+    'launcher.render': ( [ data$ ] ) => launcher
+      .getResultView( 'listview' )
+      .flatMap( view => connectObservableTo( data$, view.sources.data$ ) )
+      .subscribe( () => {} ),
 
-    'launcher.listview.chosen': () => launcher.listview.chosen$,
+    'launcher.listview.chosen': () => launcher
+      .getResultView( 'listview' ).flatMap( view => view.sinks.chosen$ ),
 
     'launcher.openExternal': ( [ source$ ] ) => source$.do( fileOrURL => open( fileOrURL ) ),
 
