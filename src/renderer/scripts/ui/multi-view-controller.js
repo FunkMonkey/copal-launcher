@@ -1,6 +1,6 @@
-import R from 'ramda';
 import React from 'react';
-import { Observable, ReplaySubject, Subject } from 'rxjs';
+import { concat, of, ReplaySubject } from 'rxjs';
+import { tap } from 'rxjs/operators';
 
 export default class MultiViewController {
   constructor() {
@@ -27,7 +27,7 @@ export default class MultiViewController {
 
   getView( name ) {
     if ( this.views[name] )
-      return Observable.of( this.views[name] );
+      return of( this.views[name] );
 
     return this.insertView( name );
   }
@@ -40,7 +40,7 @@ export default class MultiViewController {
       : this.instantiateView( name, this.getViewFactory( name ) );
 
     // wait for mounting
-    const resultView$ = Observable.concat( view.sinks.componentDidMount$, Observable.of( view ) );
+    const resultView$ = concat( view.sinks.componentDidMount$, of( view ) );
 
     if ( isAlreadyInserting )
       return resultView$;
@@ -48,10 +48,12 @@ export default class MultiViewController {
     this.viewsCurrentlyInserting[ name ] = view;
     this.viewsToInsert$.next( view );
 
-    return resultView$.do( () => {
-      delete this.viewsCurrentlyInserting[name];
-      this.views[name] = view;
-    } );
+    return resultView$.pipe(
+      tap( () => {
+        delete this.viewsCurrentlyInserting[name];
+        this.views[name] = view;
+      } )
+    );
   }
 
   // eslint-disable-next-line class-methods-use-this

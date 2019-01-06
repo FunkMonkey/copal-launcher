@@ -10,6 +10,7 @@ import getBasicOperators from './basic-operators';
 // import bindObserver from './utils/rx/bind-observer';
 import MultiViewController from './ui/multi-view-controller';
 import ListviewFactory from './ui/viewfactories/listview';
+import { tapOnComplete } from './utils/rx/tap-on-complete';
 
 export default class Launcher {
   constructor() {
@@ -49,12 +50,13 @@ export default class Launcher {
   init() {
     // TODO: make asynchronous
     const basicComponents = yaml.safeLoad( fs.readFileSync( path.join( __dirname, 'basic-graphs.yaml' ), 'utf8' ) );
-    return this.core.init()
-      .do( null, null, () => {
+    return this.core.init().pipe(
+      tapOnComplete( () => {
         this.core.commands.connector.addOperators( getBasicOperators( this ) );
         this.core.commands.templates.addComponents( basicComponents );
         console.log( 'Finished core initialization' );
-      } );
+      } )
+    );
   }
 
   addViewFactory( name, factory ) {

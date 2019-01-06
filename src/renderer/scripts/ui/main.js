@@ -1,5 +1,6 @@
 import React from 'react';
-import { Observable, ReplaySubject } from 'rxjs';
+import { of, ReplaySubject } from 'rxjs';
+import { switchAll } from 'rxjs/operators';
 
 import createReactiveComponent from '../utils/create-reactive-component';
 
@@ -9,7 +10,7 @@ import MultiView from './multi-view';
 
 function definition( { launcher } ) {
   const inputOutValue$ = new ReplaySubject( 1 );
-  inputOutValue$.switch().subscribe( launcher.input.from$ );
+  inputOutValue$.pipe( switchAll() ).subscribe( launcher.input.from$ );
 
   const onUserExitSub$ = new ReplaySubject( 1 );
   // const onUserExit$ = onUserExitSub$.switch().share();
@@ -21,7 +22,7 @@ function definition( { launcher } ) {
   // chosenListItem$.switch().subscribe( launcher.getView( 'listview' ).chosen$ );
 
   return {
-    view: Observable.of(
+    view: of(
       <div className="copal-main">
         <div className="copal-main-settings-button">...</div>
 

@@ -2,10 +2,12 @@ import cn from 'classnames';
 import keycode from 'keycode';
 import R from 'ramda';
 import React from 'react';
-import { Observable, Subject } from 'rxjs';
+import { combineLatest, empty, merge, Observable, of, Subject } from 'rxjs';
+import { distinctUntilChanged, filter, map, share, shareReplay, startWith, tap, withLatestFrom } from 'rxjs/operators';
 
 import createReactiveComponent from '../utils/create-reactive-component';
 import bindObserver from '../utils/rx/bind-observer';
+import log from '../utils/rx/log';
 
 function getDatumKey( datum, index ) {
   if ( typeof datum === 'string' )
@@ -22,38 +24,40 @@ function getDatumTitle( datum ) {
 }
 
 function definition( sources ) {
-  const data$ = sources.data$.startWith( [] ).share();
+  const data$ = sources.data$.pipe( startWith( [] ), share() );
 
   const onKeyDown$ = bindObserver( new Subject() );
-  const onDownArrow$ = onKeyDown$.filter( e => keycode( e ) === 'down' );
-  const onUpArrow$ = onKeyDown$.filter( e => keycode( e ) === 'up' );
-  const onEnter$ = onKeyDown$.filter( e => keycode( e ) === 'enter' );
+  const onDownArrow$ = onKeyDown$.pipe( filter( e => keycode( e ) === 'down' ) );
+  const onUpArrow$ = onKeyDown$.pipe( filter( e => keycode( e ) === 'up' ) );
+  const onEnter$ = onKeyDown$.pipe( filter( e => keycode( e ) === 'enter' ) );
 
-  const changeSelectedIndexBy$ = Observable.merge( onDownArrow$.map( () => 1 ),
-                                                      onUpArrow$.map( () => -1 ) );
+  const changeSelectedIndexBy$ = merge( onDownArrow$.pipe( map( () => 1 ) ),
+                                        onUpArrow$.pipe( map( () => -1 ) ) );
 
   const _selectedItemInfo$ = new Subject();
-  const selectedItemInfo$ = _selectedItemInfo$.startWith( null ).shareReplay( 1 );
+  const selectedItemInfo$ = _selectedItemInfo$.pipe( startWith( null ), shareReplay( 1 ) );
 
   // TODO: use previously selected item?
   // const lastSelectedItemInfo$ = selectedItemInfo$.filter( info => info !== null );
 
-  const selectedItemInfoFromData$ = data$
-    .withLatestFrom( selectedItemInfo$,
-      ( data, selectedItemInfo ) => {
-        if ( !selectedItemInfo )
-          return null;
+  const selectedItemInfoFromData$ = data$.pipe(
+    withLatestFrom( selectedItemInfo$ ),
+    map( ( [data, selectedItemInfo] ) => {
+      if ( !selectedItemInfo )
+        return null;
 
-        const index = R.findIndex( item => item === selectedItemInfo.item, data );
+      const index = R.findIndex( item => item === selectedItemInfo.item, data );
 
-        if ( index === -1 )
-          return null;
+      if ( index === -1 )
+        return null;
 
-        return { index, item: selectedItemInfo.item, numItems: data.length };
-      } );
+      return { index, item: selectedItemInfo.item, numItems: data.length };
+    } )
+  );
 
-  const selectedIndexFromChange$ = changeSelectedIndexBy$
-    .withLatestFrom( selectedItemInfo$, ( change, selectedItemInfo ) => {
+  const selectedIndexFromChange$ = changeSelectedIndexBy$.pipe(
+    withLatestFrom( selectedItemInfo$ ),
+    map( ( [change, selectedItemInfo] ) => {
       if ( selectedItemInfo === null )
         return 0;
 
@@ -65,32 +69,37 @@ function definition( sources ) {
         return ( nextIndex >= 0 ) ? nextIndex : numItems + nextIndex;
       }
       return ( nextIndex < numItems ) ? nextIndex : nextIndex - numItems;
-    } );
+    } )
+  );
 
-  const selectIndexRequests$ = Observable.merge( selectedIndexFromChange$,
-                                                    sources.selectIndex$ || Observable.empty() );
+  const selectIndexRequests$ = merge( selectedIndexFromChange$,
+                                      sources.selectIndex$ || empty() );
 
-  const selectedItemInfoFromRequest$ = selectIndexRequests$.withLatestFrom( data$,
-    ( index, data ) => {
+  const selectedItemInfoFromRequest$ = selectIndexRequests$.pipe(
+    withLatestFrom( data$ ),
+    map( ( [index, data] ) => {
       if ( data[index] )
         return { index, item: data[index], numItems: data.length };
       return null;
-    } );
+    } )
+  );
 
   // TODO: handle subscription
-  Observable.merge( selectedItemInfoFromData$, selectedItemInfoFromRequest$ )
-    .distinctUntilChanged()
+  merge( selectedItemInfoFromData$, selectedItemInfoFromRequest$ )
+    .pipe( distinctUntilChanged() )
     .subscribe( _selectedItemInfo$ );
 
-  const chosenListItem$ = onEnter$.withLatestFrom( selectedItemInfo$,
-    ( evt, selectedItemInfo ) => selectedItemInfo.item );
+  const chosenListItem$ = onEnter$.pipe(
+    withLatestFrom( selectedItemInfo$ ),
+    map( ( [, selectedItemInfo] ) => selectedItemInfo.item )
+  );
 
   // using Observable.create for focus subscription
   const dom$ = Observable.create( observer => {
     let domNode = null;
 
-    const domSubscription = Observable.combineLatest( data$, selectedItemInfo$,
-      ( data, selectedItemInfo ) => {
+    const domSubscription = combineLatest( data$, selectedItemInfo$ ).pipe(
+      map( ( [data, selectedItemInfo] ) => {
         const listItems = data.map( ( d, i ) => (
           <div
             className={cn( 'list-item', { 'is-selected': i === ( selectedItemInfo ? selectedItemInfo.index : -1 ) } )}
@@ -112,9 +121,11 @@ function definition( sources ) {
           </div>
         );
       } )
-      .subscribe( observer );
+    ).subscribe( observer );
 
-    const focus$ = sources.focus$ ? sources.focus$.do( () => domNode && domNode.focus() ) : Observable.of( '' );
+    const focus$ = sources.focus$
+      ? sources.focus$.pipe( tap( () => domNode && domNode.focus() ) )
+      : of( '' );
     const focusSubscription = focus$.subscribe( () => {} );
     return () => {
       domSubscription.unsubscribe();

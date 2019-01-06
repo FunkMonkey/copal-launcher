@@ -1,6 +1,7 @@
 
 import React from 'react';
-import { Observable, ReplaySubject, Subject } from 'rxjs';
+import { merge, ReplaySubject, Subject } from 'rxjs';
+import { ignoreElements, map, share, switchAll } from 'rxjs/operators';
 import ListView from '../list-view';
 import Mounter from '../mounter';
 
@@ -11,8 +12,9 @@ export default function ( ) {
     reset$: new Subject(),
   };
 
-  const enter$ = sources.enter$.share();
-  const selectIndex$ = Observable.merge( sources.reset$.map( () => -1 ), enter$.map( () => 0 ) );
+  const enter$ = sources.enter$.pipe( share() );
+  const selectIndex$ = merge( sources.reset$.pipe( map( () => -1 ) ),
+                              enter$.pipe( map( () => 0 ) ) );
   const chosen$ = new ReplaySubject( 1 );
   const componentDidMount$ = new Subject();
 
@@ -28,8 +30,8 @@ export default function ( ) {
   );
 
   const sinks = {
-    chosen$: chosen$.switch().share(),
-    componentDidMount$: componentDidMount$.ignoreElements()
+    chosen$: chosen$.pipe( switchAll(), share() ),
+    componentDidMount$: componentDidMount$.pipe( ignoreElements() )
   };
 
   return {

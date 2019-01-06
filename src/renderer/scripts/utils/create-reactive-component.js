@@ -1,7 +1,8 @@
 import * as rrc from 'reactive-react-component';
 import React from 'react';
-import Rx from 'rxjs/Rx';
+import { Observable } from 'rxjs';
 
-const env = { React, Observable: Rx.Observable };
+
+const env = { React, Observable };
 
 export default rrc.createReactiveComponent.bind( null, env );

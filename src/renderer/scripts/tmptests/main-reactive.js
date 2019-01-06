@@ -1,9 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Rx from 'rxjs/Rx';
+import { Observable } from 'rxjs';
 import Hello from './hello-reactive';
 
-const greeting$ = Rx.Observable
+const greeting$ = Observable
   .interval( 3000 )
   .map( count => ( count % 2 === 0 ? 'Hey, my name is'
                                    : 'What, my name is' ) );

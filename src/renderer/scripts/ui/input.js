@@ -1,23 +1,23 @@
 import keycode from 'keycode';
 import React from 'react';
-import { Observable, Subject } from 'rxjs';
+import { empty, merge, Subject } from 'rxjs';
+import { distinctUntilChanged, filter, ignoreElements, map, tap } from 'rxjs/operators';
 
 import createReactiveComponent from '../utils/create-reactive-component';
 import bindObserver from '../utils/rx/bind-observer';
 
 function definition( sources ) {
   const onChange$ = bindObserver( new Subject() );
-  const value$ = onChange$
-    .map( ev => ev.target.value );
+  const value$ = onChange$.pipe( map( ev => ev.target.value ) );
 
   const onKeyDown$ = bindObserver( new Subject() );
-  const onUserExit$ = onKeyDown$.filter( e => keycode( e ) === 'down' );
+  const onUserExit$ = onKeyDown$.pipe( map( filter( e => keycode( e ) === 'down' ) ) );
 
   let domNode = null;
 
-  const dom$ = Observable.merge( value$, sources.value$ )
-    .distinctUntilChanged()
-    .map( value => (
+  const dom$ = merge( value$, sources.value$ ).pipe(
+    distinctUntilChanged(),
+    map( value => (
       <input
         autoFocus
         ref={node => { domNode = node; }}
@@ -26,15 +26,16 @@ function definition( sources ) {
         value={value}
         onChange={onChange$.next}
         onKeyDown={onKeyDown$.next}
-      /> )
-    );
+      /> ) )
+  );
 
-  const focus$ = sources.focus$ ? sources.focus$.do( () => domNode && domNode.focus() ) :
-    Observable.empty();
+  const focus$ = sources.focus$
+    ? sources.focus$.pipe( tap( () => domNode && domNode.focus() ) )
+    : empty();
 
 
   return {
-    view: Observable.merge( dom$, focus$.ignoreElements() ),
+    view: merge( dom$, focus$.pipe( ignoreElements() ) ),
     outValue$: value$,
     onUserExit$
   };

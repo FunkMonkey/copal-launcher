@@ -1,11 +1,11 @@
-import Rx from 'rxjs/Rx';
+import { Observable, Subject } from 'rxjs';
 import React from 'react';
 
 export default function ( sources ) {
-  const onChange$ = new Rx.Subject();
+  const onChange$ = new Subject();
   const name$ = onChange$.map( evt => evt.target.value ).startWith( '' );
 
-  const view$ = Rx.Observable.combineLatest( sources.greeting$, name$ )
+  const view$ = Observable.combineLatest( sources.greeting$, name$ )
     .map( ( [greeting, name] ) => (
       <div>
         <h1>{greeting}: {name}</h1>
