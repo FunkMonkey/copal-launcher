@@ -19,6 +19,7 @@ function definition( sources ) {
     distinctUntilChanged(),
     map( value => (
       <input
+        // eslint-disable-next-line jsx-a11y/no-autofocus
         autoFocus
         ref={node => { domNode = node; }}
         type="edit"

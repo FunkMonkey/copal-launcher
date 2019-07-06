@@ -42,6 +42,8 @@
     "ramda": "0.25.0",
     "react": "16.2.0",
     "react-dom": "16.2.0",
+    "reactive-plugin-system": "0.0.1",
+    "reactive-react-component": "1.0.0",
     "rxjs": "6.3.3"
   }
 }

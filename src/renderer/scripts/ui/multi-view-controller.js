@@ -1,4 +1,3 @@
-import React from 'react';
 import { concat, of, ReplaySubject } from 'rxjs';
 import { tap } from 'rxjs/operators';
 

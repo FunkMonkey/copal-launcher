@@ -7,7 +7,6 @@ import { distinctUntilChanged, filter, map, share, shareReplay, startWith, tap, 
 
 import createReactiveComponent from '../utils/create-reactive-component';
 import bindObserver from '../utils/rx/bind-observer';
-import log from '../utils/rx/log';
 
 function getDatumKey( datum, index ) {
   if ( typeof datum === 'string' )
@@ -61,8 +60,7 @@ function definition( sources ) {
       if ( selectedItemInfo === null )
         return 0;
 
-      const currIndex = selectedItemInfo.index;
-      const numItems = selectedItemInfo.numItems;
+      const { index: currIndex, numItems } = selectedItemInfo;
 
       const nextIndex = currIndex + change;
       if ( change < 0 ) {
@@ -113,6 +111,7 @@ function definition( sources ) {
             className="copal-list-view"
             role="presentation"
             ref={node => { domNode = node; }}
+            // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
             tabIndex="0"
             onKeyDown={onKeyDown$.next}
             // onClick={actions.listener( 'onClick' )}
