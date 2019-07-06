@@ -1,6 +1,7 @@
 const gulp = require( 'gulp' );
 const sourcemaps = require( 'gulp-sourcemaps' );
 const babel = require( 'gulp-babel' );
+const package = require( './package.json' );
 
 function watchTask( task ) {
 	const watcher = gulp.watch( [task.SRC_GLOB], { cwd: __dirname }, task);
@@ -26,7 +27,7 @@ const MAIN_SCRIPTS_DEST = './build/main';
 
 const buildMainScripts = () => buildScripts( MAIN_SCRIPTS_SRC_GLOB, MAIN_SCRIPTS_DEST );
 
-buildMainScripts.displayName = 'build:main:scripts';
+buildMainScripts.displayName = package.name + ' build:main:scripts';
 buildMainScripts.SRC_GLOB = MAIN_SCRIPTS_SRC_GLOB;
 
 // ========================= RENDERER =========================
@@ -38,7 +39,7 @@ const RENDERER_SCRIPTS_DEST = './build/renderer/scripts';
 
 const buildRendererScripts = () => buildScripts( RENDERER_SCRIPTS_SRC_GLOB, RENDERER_SCRIPTS_DEST );
 
-buildRendererScripts.displayName = 'build:renderer:scripts';
+buildRendererScripts.displayName = package.name + ' build:renderer:scripts';
 buildRendererScripts.SRC_GLOB = RENDERER_SCRIPTS_SRC_GLOB;
 
 // ------------------------- Styles -------------------------
@@ -49,7 +50,7 @@ const buildRendererStyles = ()  =>
   gulp.src( RENDERER_STYLES_SRC_GLOB, { cwd: __dirname } )
       .pipe( gulp.dest( RENDERER_STYLES_DEST, { cwd: __dirname } ) );
 
-buildRendererStyles.displayName = 'build:renderer:styles';
+buildRendererStyles.displayName = package.name + ' build:renderer:styles';
 buildRendererStyles.SRC_GLOB = RENDERER_STYLES_SRC_GLOB;
 
 // ------------------------- Views -------------------------
@@ -61,7 +62,7 @@ const buildRendererViews = () =>
   gulp.src( RENDERER_VIEWS_SRC_GLOB, { cwd: __dirname } )
       .pipe( gulp.dest( RENDERER_VIEWS_DEST, { cwd: __dirname } ) );
 
-buildRendererViews.displayName = 'build:renderer:views';
+buildRendererViews.displayName = package.name + ' build:renderer:views';
 buildRendererViews.SRC_GLOB = RENDERER_VIEWS_SRC_GLOB;
 
 // ------------------------- YAML -------------------------
@@ -73,14 +74,14 @@ const buildRendererYAML = () =>
   gulp.src( RENDERER_YAML_SRC_GLOB, { cwd: __dirname } )
       .pipe( gulp.dest( RENDERER_YAML_DEST, { cwd: __dirname } ) );
 
-buildRendererYAML.displayName = 'build:renderer:yaml';
+buildRendererYAML.displayName = package.name + ' build:renderer:yaml';
 buildRendererYAML.SRC_GLOB = RENDERER_YAML_SRC_GLOB;
 
 // ========================= ALL =========================
 const build = gulp.parallel( [ buildMainScripts, buildRendererScripts,
                                buildRendererStyles, buildRendererViews,
                                buildRendererYAML ] );
-build.displayName = 'build';
+build.displayName = package.name + ' build';
 
 const watchBuild = () => {
   watchTask( buildMainScripts );
@@ -89,8 +90,8 @@ const watchBuild = () => {
   watchTask( buildRendererViews );
   watchTask( buildRendererYAML );
 };
-watchBuild.displayName = 'watch:build';
+watchBuild.displayName = package.name + ' watch:build';
 
 // ========================= EXPORTS =========================
-module.exports[build.displayName] = build;
-module.exports[watchBuild.displayName] = watchBuild;
+module.exports['build'] = build;
+module.exports['watch:build'] = watchBuild;
