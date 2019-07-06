@@ -26,5 +26,8 @@ function definition( { controller } ) {
 
 export default createReactiveComponent( {
   displayName: 'MultiView',
-  definition
+  definition,
+  directSources: true,
+  sourceNames: ['controller'],
+  sinkNames: []
 } );

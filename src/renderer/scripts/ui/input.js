@@ -43,5 +43,8 @@ function definition( sources ) {
 
 export default createReactiveComponent( {
   displayName: 'CopalInput',
-  definition
+  definition,
+  directSources: true,
+  sourceNames: ['focus$', 'value$'],
+  sinkNames: ['outValue$', 'onUserExit$']
 } );

@@ -138,5 +138,8 @@ function definition( sources ) {
 
 export default createReactiveComponent( {
   displayName: 'ListView',
-  definition
+  definition,
+  directSources: true,
+  sourceNames: ['data$', 'focus$', 'selectIndex$'],
+  sinkNames: ['chosenListItem$']
 } );

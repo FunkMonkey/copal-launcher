@@ -13,5 +13,8 @@ function definition( { text$ } ) {
 
 export default createReactiveComponent( {
   displayName: 'CopalInput',
-  definition
+  definition,
+  directSources: true,
+  sourceNames: ['text$'],
+  sinkNames: []
 } );

@@ -53,5 +53,8 @@ function definition( { launcher } ) {
 
 export default createReactiveComponent( {
   displayName: 'Main',
-  definition
+  definition,
+  directSources: true,
+  sourceNames: [ 'launcher' ],
+  sinkNames: []
 } );
