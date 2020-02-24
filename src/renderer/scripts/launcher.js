@@ -74,8 +74,7 @@ export default class Launcher {
   }
 
   instantiateCommand( commandName ) {
-    if ( this.currCommand )
-      this.core.commands.destroy( this.currCommand );
+    if ( this.currCommand ) this.core.commands.destroy( this.currCommand );
 
     this.resetUI();
 

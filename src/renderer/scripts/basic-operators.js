@@ -1,6 +1,8 @@
 import open from 'open';
 import { Observable } from 'rxjs';
-import { flatMap, map, startWith, tap } from 'rxjs/operators';
+import {
+  flatMap, map, startWith, tap
+} from 'rxjs/operators';
 
 function connectObservableTo( observable$, observer ) {
   return new Observable( () => {
@@ -11,8 +13,8 @@ function connectObservableTo( observable$, observer ) {
 
 export default function ( launcher ) {
   return {
-    'launcher.instantiateCommand': ( [ commandName$ ] ) =>
-      commandName$.pipe( map( commandName => launcher.instantiateCommand( commandName ) ) ),
+    'launcher.instantiateCommand': ( [ commandName$ ] ) => commandName$
+      .pipe( map( commandName => launcher.instantiateCommand( commandName ) ) ),
 
     'launcher.fromInput': () => launcher.input.from$.pipe( startWith( '' ) ),
 

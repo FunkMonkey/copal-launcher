@@ -1,7 +1,9 @@
 import keycode from 'keycode';
 import React from 'react';
 import { empty, merge, Subject } from 'rxjs';
-import { distinctUntilChanged, filter, ignoreElements, map, tap } from 'rxjs/operators';
+import {
+  distinctUntilChanged, filter, ignoreElements, map, tap
+} from 'rxjs/operators';
 
 import createReactiveComponent from '../utils/create-reactive-component';
 import bindObserver from '../utils/rx/bind-observer';
@@ -27,7 +29,8 @@ function definition( sources ) {
         value={value}
         onChange={onChange$.next}
         onKeyDown={onKeyDown$.next}
-      /> ) )
+      />
+    ) )
   );
 
   const focus$ = sources.focus$

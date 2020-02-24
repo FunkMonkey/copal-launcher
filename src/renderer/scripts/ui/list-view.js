@@ -2,22 +2,24 @@ import cn from 'classnames';
 import keycode from 'keycode';
 import R from 'ramda';
 import React from 'react';
-import { combineLatest, empty, merge, Observable, of, Subject } from 'rxjs';
-import { distinctUntilChanged, filter, map, share, shareReplay, startWith, tap, withLatestFrom } from 'rxjs/operators';
+import {
+  combineLatest, empty, merge, Observable, of, Subject
+} from 'rxjs';
+import {
+  distinctUntilChanged, filter, map, share, shareReplay, startWith, tap, withLatestFrom
+} from 'rxjs/operators';
 
 import createReactiveComponent from '../utils/create-reactive-component';
 import bindObserver from '../utils/rx/bind-observer';
 
 function getDatumKey( datum, index ) {
-  if ( typeof datum === 'string' )
-    return index;
+  if ( typeof datum === 'string' ) return index;
 
   return datum.id || index;
 }
 
 function getDatumTitle( datum ) {
-  if ( typeof datum === 'string' )
-    return datum;
+  if ( typeof datum === 'string' ) return datum;
 
   return datum.title;
 }
@@ -42,13 +44,11 @@ function definition( sources ) {
   const selectedItemInfoFromData$ = data$.pipe(
     withLatestFrom( selectedItemInfo$ ),
     map( ( [data, selectedItemInfo] ) => {
-      if ( !selectedItemInfo )
-        return null;
+      if ( !selectedItemInfo ) return null;
 
       const index = R.findIndex( item => item === selectedItemInfo.item, data );
 
-      if ( index === -1 )
-        return null;
+      if ( index === -1 ) return null;
 
       return { index, item: selectedItemInfo.item, numItems: data.length };
     } )
@@ -57,8 +57,7 @@ function definition( sources ) {
   const selectedIndexFromChange$ = changeSelectedIndexBy$.pipe(
     withLatestFrom( selectedItemInfo$ ),
     map( ( [change, selectedItemInfo] ) => {
-      if ( selectedItemInfo === null )
-        return 0;
+      if ( selectedItemInfo === null ) return 0;
 
       const { index: currIndex, numItems } = selectedItemInfo;
 
@@ -76,8 +75,7 @@ function definition( sources ) {
   const selectedItemInfoFromRequest$ = selectIndexRequests$.pipe(
     withLatestFrom( data$ ),
     map( ( [index, data] ) => {
-      if ( data[index] )
-        return { index, item: data[index], numItems: data.length };
+      if ( data[index] ) return { index, item: data[index], numItems: data.length };
       return null;
     } )
   );
@@ -104,7 +102,8 @@ function definition( sources ) {
             key={getDatumKey( d, i )}
           >
             {getDatumTitle( d )}
-          </div> ) );
+          </div>
+        ) );
 
         return (
           <div

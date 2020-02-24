@@ -1,4 +1,4 @@
-  extends: "eslint-config-funkmonkey/react"
+  extends: "eslint-config-funkmonkey/javascript-react"
   env:
     node: true
     browser: true

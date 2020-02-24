@@ -8,6 +8,6 @@ export default class Mounter extends React.Component {
 
   render() {
     // eslint-disable-next-line react/prop-types
-    return <React.Fragment>{this.props.children}</React.Fragment>;
+    return <>{this.props.children}</>;
   }
 }

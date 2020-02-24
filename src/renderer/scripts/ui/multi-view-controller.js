@@ -25,8 +25,7 @@ export default class MultiViewController {
   }
 
   getView( name ) {
-    if ( this.views[name] )
-      return of( this.views[name] );
+    if ( this.views[name] ) return of( this.views[name] );
 
     return this.insertView( name );
   }
@@ -41,8 +40,7 @@ export default class MultiViewController {
     // wait for mounting
     const resultView$ = concat( view.sinks.componentDidMount$, of( view ) );
 
-    if ( isAlreadyInserting )
-      return resultView$;
+    if ( isAlreadyInserting ) return resultView$;
 
     this.viewsCurrentlyInserting[ name ] = view;
     this.viewsToInsert$.next( view );

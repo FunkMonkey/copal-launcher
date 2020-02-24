@@ -16,7 +16,8 @@ function definition( { controller } ) {
       const views = viewsToInsert.map( view => (
         <div key={view.name} className={( currentView === view.name ) ? view.name : `${view.name} hidden_`}>
           {view.component}
-        </div> ) );
+        </div>
+      ) );
       return <div className="multi-view">{views}</div>;
     } )
   );

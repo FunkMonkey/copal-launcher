@@ -1,8 +1,8 @@
 
 import electron from 'electron';
 
-const app = electron.app;  // Module to control application life.
-const BrowserWindow = electron.BrowserWindow;  // Module to create native browser window.
+const { app } = electron; // Module to control application life.
+const { BrowserWindow } = electron; // Module to create native browser window.
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
